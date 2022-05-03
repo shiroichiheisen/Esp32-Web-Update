@@ -14,11 +14,11 @@ After that, you declare the web_update object with the folowing customizations:
 
 HOST - The URL to the firmware file. - Mandatory
 
-Debbuger - If you want to know what's happening on the update via Serial, set this to 1. - Opcional
+Debbuger - If you want to know what's happening on the update via Serial, set this to 1. - Opcional (Default: 0)
 
-Buffer Size - The size of the buffer to store the firmware. - Opcional
+Buffer Size - The size of the buffer to store the firmware. - Opcional (Default: 64)
 
-Time Out - Timeout for the update process. - Opcional
+Time Out - Timeout for the update process. - Opcional (Default: 60)
 
 ```
 web_update webupdate(String HOST, int Debbuger, int BUFFER_SIZE, int TIME_OUT);
