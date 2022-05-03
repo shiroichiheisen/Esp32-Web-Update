@@ -31,11 +31,11 @@ webUpdate.update();
 
 If any error occurs, the method will return the error code:
 
--1 - Wifi not connected.
+1 - Wifi not connected.
 
--2 - File or host not found.
+2 - File or host not found.
 
--3 - Update Timeout.
+3 - Update Timeout.
 
 Future updates will suport ethernet and other network types.
 

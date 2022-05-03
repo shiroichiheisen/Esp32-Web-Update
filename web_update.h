@@ -21,7 +21,7 @@ When calling the update method, if any error occurs, the method will return the 
 class web_update
 {
 public:
-    web_update(String Host, int debuger = 0, int read_buffer = 124, int timeout_seconds = 60);
+    web_update(String Host, int debuger = 0, int read_buffer = 64, int timeout_seconds = 60);
     int update();
 
 private:
