@@ -38,6 +38,10 @@ If any error occurs, the method will return the error code:
 
 3 - Update Timeout.
 
+## Errors that i have seen:
+
+If you create the firmware file (.bin) on arduino and make the update firmware (.bin) on platformio or vice versa, the update process will complete but when the esp32 try to load the firmware will show that the firmware its corrupted! The firmware and the update firmware MUST BE ON THE SAME PLATFORM!.
+
 Future updates will suport ethernet and other network types.
 
 Library created from the archives of [@kurimawxx00/webota-esp32](https://github.com/kurimawxx00/webota-esp32).
