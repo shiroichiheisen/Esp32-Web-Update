@@ -44,4 +44,4 @@ If you create the firmware file (.bin) on arduino and make the update firmware (
 
 Future updates will suport ethernet and other network types.
 
-Library created from the archives of [@kurimawxx00/webota-esp32](https://github.com/kurimawxx00/webota-esp32).
+Library based on [@kurimawxx00/webota-esp32](https://github.com/kurimawxx00/webota-esp32).
