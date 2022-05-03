@@ -21,7 +21,7 @@ Buffer Size - The size of the buffer to store the firmware. - Opcional (Default:
 Time Out - Timeout for the update process. - Opcional (Default: 60)
 
 ```
-web_update webupdate(String HOST, int Debbuger, int BUFFER_SIZE, int TIME_OUT);
+web_update webUpdate(String HOST, int Debbuger, int BUFFER_SIZE, int TIME_OUT);
 ```
 
 When you want to start the update process, you call the following method:
