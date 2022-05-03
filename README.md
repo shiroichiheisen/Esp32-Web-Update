@@ -1,5 +1,6 @@
 # Esp32 Web Update
 
+Library for updating the firmware of an Esp32 device over the web.
 
 ## ☕ Using this library
 
