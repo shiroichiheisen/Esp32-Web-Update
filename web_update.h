@@ -4,6 +4,7 @@
 #include <Arduino.h>
 #include <HTTPClient.h>
 #include <Update.h>
+#include <Ethernet.h>
 
 /*
 
@@ -21,12 +22,14 @@ When calling the update method, if any error occurs, the method will return the 
 class web_update
 {
 public:
-    web_update(String Host, int debuger = 0, int read_buffer = 64, int timeout_seconds = 60);
-    int update();
+    web_update(String host, String directory,  int debuger = 0, int https = 1,int read_buffer = 64, int timeout_seconds = 60);
+    int update_wifi();
+    int update_ethernet();
 
 private:
-    HTTPClient client;
-    String Host;
-    int buffer;
+    EthernetClient ethernet_client;
+    HTTPClient wifi_client;
+    String Host, dir;
+    int buffer, Https;
 };
 #endif

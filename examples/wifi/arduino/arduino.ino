@@ -1,14 +1,17 @@
-#include <Arduino.h>
 #include <WiFi.h>
 #include <HTTPClient.h>
 #include <Update.h>
 #include <web_update.h>
 
-String HOST = "https://host.com/firmware.bin";
+String HOST = "www.host.com";
+String Dir = "/firmware.bin";
 
-web_update webUpdate(HOST, 1);
+web_update webUpdate(HOST, Dir, 1);
+
 const char *ssid = "WIFI SSID";
+
 const char *password = "WIFI PASSWORD";
+
 void setup()
 {
     Serial.begin(115200);
@@ -24,7 +27,9 @@ void setup()
     Serial.println("WiFi connected");
     Serial.println("IP address: ");
     Serial.println(WiFi.localIP());
-    webUpdate.update();
+    webUpdate.update_wifi();
+    while (1)
+        ;
 }
 
 void loop()
