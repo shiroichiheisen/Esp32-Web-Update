@@ -1,2 +1,9 @@
 web_update	KEYWORD1
-update	KEYWORD2
+update_wifi KEYWORD2
+update_ethernet KEYWORD2
+host KEYWORD2
+directory KEYWORD2
+debugger KEYWORD2
+https KEYWORD2
+buffer_size KEYWORD2
+timeout KEYWORD2
