@@ -22,6 +22,31 @@ web_update::web_update(String host, String directory, int debugger, int https, i
     Https = https;
 }
 
+void web_update::host(String host)
+{
+    Host = host;
+}
+void web_update::directory(String Dir)
+{
+    dir = Dir;
+}
+void web_update::debugger(int debugger)
+{
+    debug = debugger;
+}
+void web_update::https(int https)
+{
+    Https = https;
+}
+void web_update::buffer_size(int Buffer)
+{
+    buffer = Buffer;
+}
+void web_update::timeout(int timeout)
+{
+    time_out = timeout;
+}
+
 void updateFirmware(uint8_t *data, size_t len)
 {
     Update.write(data, len);

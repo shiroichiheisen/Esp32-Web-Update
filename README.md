@@ -12,13 +12,13 @@ To use this library, you need to download, install the library, and include the 
 
 After that, you declare the web_update object with the following customizations:
 
-HOST - DNS of the server where the firmware is - Mandatory
+HOST - DNS of the server where the firmware is - Optional
 
-Directory - The URL to the firmware file inside the server. - Mandatory
+Directory - The URL to the firmware file inside the server. - Optional
 
-Debugger - If you want to know what's happening on the update via Serial, set this to 1. - Opcional (Default: 0)
+Debugger - If you want to know what's happening on the update via Serial, set this to 1. - Optional (Default: 0)
 
-HTTPS - If you're using SSL or not on your website, 0 to HTTP and 1 to HTTPS - Opcional (Default: 1)
+HTTPS - If you're using SSL or not on your website, 0 to HTTP and 1 to HTTPS - Optional (Default: 1)
 
 The ethernet update part only works with http links (without ssl)!!!!!!!!
 
@@ -31,6 +31,40 @@ web_update webUpdate(String HOST, String Directory, int Debbuger, int HTTPS, int
 
 web_update webUpdate("www.google.com", "/firmware_file.bin", 1, 1, 128, 120);
 ```
+
+You can change the options above in the code:
+
+Change host:
+```
+webUpdate.host(String Host);
+```
+
+Change Directory:
+```
+webUpdate.directory(String Directory);
+```
+
+Change Debugger level:
+```
+webUpdate.debugger(int Debugger);
+```
+
+Change https level:
+```
+webUpdate.https(int https);
+```
+
+Change Buffer Size:
+```
+webUpdate.buffer_size(int buffer_size);
+```
+
+Change Time Out time:
+```
+webUpdate.timeout(int timeout);
+```
+
+----
 
 When you want to start the update process, you call the following methods:
 

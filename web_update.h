@@ -22,9 +22,15 @@ When calling the update method, if any error occurs, the method will return the 
 class web_update
 {
 public:
-    web_update(String host, String directory,  int debuger = 0, int https = 1,int read_buffer = 64, int timeout_seconds = 60);
+    web_update(String host = "", String directory = "", int debugger = 0, int https = 1, int read_buffer = 64, int timeout_seconds = 60);
     int update_wifi();
     int update_ethernet();
+    void host(String host);
+    void directory(String Dir);
+    void debugger(int debugger);
+    void https(int https);
+    void buffer_size(int Buffer);
+    void timeout(int timeout);
 
 private:
     EthernetClient ethernet_client;
