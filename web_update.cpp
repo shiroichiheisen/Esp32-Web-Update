@@ -126,6 +126,7 @@ int web_update::update_wifi()
     return 0; // to dont show warning on vscode using platformio
 }
 
+#ifdef UpdateOverEthernet
 int web_update::update_ethernet()
 {
 
@@ -208,3 +209,4 @@ int web_update::update_ethernet()
     ESP.restart();
     return 0; // to dont show warning on vscode using platformio
 }
+#endif
