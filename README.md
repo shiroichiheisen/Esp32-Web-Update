@@ -4,9 +4,10 @@ Library for updating the firmware of an Esp32 device over the web with wifi and 
 
 ## ☕ Using this library
 
-To use this library, you need to download, install the library, and include the following file in your project:
+To use this library, you need to download, install the library, define if you will use ethernet to update, and include the following file in your project:
 
 ```
+#define UpdateOverEthernet //Only if you will use ethernet to update the firmware
 #include <web_update.h>
 ```
 

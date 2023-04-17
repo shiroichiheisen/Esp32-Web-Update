@@ -4,7 +4,10 @@
 #include <Arduino.h>
 #include <HTTPClient.h>
 #include <Update.h>
+
+#ifdef UpdateOverEthernet
 #include <Ethernet.h>
+#endif
 
 /*
 
@@ -23,17 +26,22 @@ class web_update
 {
 public:
     web_update(String host = "", String directory = "", int debugger = 0, int https = 1, int read_buffer = 64, int timeout_seconds = 60);
-    int update_wifi();
-    int update_ethernet();
     void host(String host);
     void directory(String Dir);
     void debugger(int debugger);
     void https(int https);
     void buffer_size(int Buffer);
     void timeout(int timeout);
+    int update_wifi();
+    
+#ifdef UpdateOverEthernet
+    int update_ethernet();
+#endif
 
 private:
+#ifdef UpdateOverEthernet
     EthernetClient ethernet_client;
+#endif
     HTTPClient wifi_client;
     String Host, dir;
     int buffer, Https;
