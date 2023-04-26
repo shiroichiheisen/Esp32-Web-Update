@@ -33,17 +33,26 @@ public:
     void buffer_size(int Buffer);
     void timeout(int timeout);
     int update_wifi();
-    
+
 #ifdef UpdateOverEthernet
     int update_ethernet();
 #endif
 
 private:
+    HTTPClient
+        wifi_client;
+
+    String
+        Host,
+        dir;
+
+    int
+        buffer,
+        Https;
+
 #ifdef UpdateOverEthernet
-    EthernetClient ethernet_client;
+    EthernetClient
+        ethernet_client;
 #endif
-    HTTPClient wifi_client;
-    String Host, dir;
-    int buffer, Https;
 };
 #endif

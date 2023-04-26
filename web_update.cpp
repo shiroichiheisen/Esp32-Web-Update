@@ -5,9 +5,11 @@
 
 int
     totalLength,
-    debug,
     time_out,
     currentLength = 0;
+
+bool
+    debug;
 
 unsigned long
     delai;
@@ -122,6 +124,7 @@ int web_update::update_wifi()
             if (len > 0)
                 len -= c;
         }
+        vTaskDelay(1);
     }
     return 0; // to dont show warning on vscode using platformio
 }
@@ -165,7 +168,7 @@ int web_update::update_ethernet()
     delai = millis();
     time_out *= 1000;
     while (ethernet_client.connected() && !ethernet_client.available())
-        delay(1); // waits for data
+        vTaskDelay(1); // waits for data
     while (ethernet_client.connected() || ethernet_client.available())
     {
         unsigned long currentMillis = millis();
@@ -203,6 +206,7 @@ int web_update::update_ethernet()
             }
             resp_header += 1;
         }
+        vTaskDelay(1);
     }
     ethernet_client.stop(); // stop ethernet_client
     Update.end(true);
