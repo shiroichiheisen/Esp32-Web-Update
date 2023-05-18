@@ -33,6 +33,7 @@ public:
     void buffer_size(int Buffer);
     void timeout(int timeout);
     int update_wifi();
+    bool isUpdating();
 
 #ifdef UpdateOverEthernet
     int update_ethernet();
@@ -49,6 +50,9 @@ private:
     int
         buffer,
         Https;
+
+    bool
+        updatingFirmware = false;
 
 #ifdef UpdateOverEthernet
     EthernetClient

@@ -106,6 +106,7 @@ int web_update::update_wifi()
     time_out *= 1000;
     while (wifi_client.connected() && (len > 0 || len == -1))
     {
+        updatingFirmware = true;
         unsigned long currentMillis = millis();
         if ((unsigned long)(currentMillis - delai) >= time_out)
         {
@@ -127,6 +128,11 @@ int web_update::update_wifi()
         vTaskDelay(1);
     }
     return 0; // to dont show warning on vscode using platformio
+}
+
+bool web_update::isUpdating()
+{
+    return updatingFirmware;
 }
 
 #ifdef UpdateOverEthernet

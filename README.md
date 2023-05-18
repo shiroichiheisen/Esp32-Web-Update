@@ -65,6 +65,11 @@ Change Time Out time:
 webUpdate.timeout(int timeout);
 ```
 
+Verify if its updating the firmware:
+```
+webUpdate.isUpdating();
+```
+
 ----
 
 When you want to start the update process, you call the following methods:
