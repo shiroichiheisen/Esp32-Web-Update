@@ -64,7 +64,7 @@ void web_update::updateFirmware(uint8_t *data, size_t len)
 
 int web_update::update_wifi()
 {
-    char host[100];
+    char host[strlen(HostC) + strlen(dirC) + 20];
     if (Https)
         strcpy(host, "https://");
     else
