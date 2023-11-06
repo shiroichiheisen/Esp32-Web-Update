@@ -5,6 +5,8 @@
 #include <HTTPClient.h>
 #include <Update.h>
 
+// #define UpdateOverEthernet //uncomment this line if you want to use ethernet instead of wifi
+
 #ifdef UpdateOverEthernet
 #include <Ethernet.h>
 #endif
@@ -25,13 +27,13 @@ When calling the update method, if any error occurs, the method will return the 
 class web_update
 {
 public:
-    web_update(String host = "", String directory = "", int debugger = 0, int https = 1, int read_buffer = 64, int timeout_seconds = 60);
-    void host(String host);
-    void directory(String Dir);
-    void debugger(int debugger);
-    void https(int https);
-    void buffer_size(int Buffer);
-    void timeout(int timeout);
+    web_update(bool debugger = false, bool https = true, uint16_t read_buffer = 64, uint8_t timeout_seconds = 60);
+    void host(char *host);
+    void directory(char *Dir);
+    void debugger(bool debugger);
+    void https(bool https);
+    void buffer_size(uint16_t Buffer);
+    void timeout(uint8_t timeout);
     int update_wifi();
     bool isUpdating();
 
@@ -40,19 +42,30 @@ public:
 #endif
 
 private:
+    void updateFirmware(uint8_t *data, size_t len);
+
+    uint32_t
+        totalLength,
+        currentLength = 0,
+        time_out;
+
+    uint16_t
+        buffer;
+
+    bool
+        debug,
+        Https,
+        updatingFirmware = false;
+
+    unsigned long
+        delai;
+
     HTTPClient
         wifi_client;
 
-    String
-        Host,
-        dir;
-
-    int
-        buffer,
-        Https;
-
-    bool
-        updatingFirmware = false;
+    char
+        *HostC,
+        *dirC;
 
 #ifdef UpdateOverEthernet
     EthernetClient

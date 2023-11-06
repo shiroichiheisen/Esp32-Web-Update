@@ -3,58 +3,54 @@
 #include <Update.h>
 #include <WiFi.h>
 
-int
-    totalLength,
-    time_out,
-    currentLength = 0;
-
-bool
-    debug;
-
-unsigned long
-    delai;
-
-web_update::web_update(String host, String directory, int debugger, int https, int read_buffer, int timeout_seconds)
+web_update::web_update(bool debugger, bool https, uint16_t read_buffer, uint8_t timeout_seconds)
 {
-    Host = host;
     buffer = read_buffer;
     debug = debugger;
     time_out = timeout_seconds;
-    dir = directory;
     Https = https;
 }
 
-void web_update::host(String host)
+void web_update::host(char *host)
 {
-    Host = host;
+    HostC = host;
 }
-void web_update::directory(String Dir)
+
+void web_update::directory(char *Dir)
 {
-    dir = Dir;
+    dirC = Dir;
 }
-void web_update::debugger(int debugger)
+
+void web_update::debugger(bool debugger)
 {
     debug = debugger;
 }
-void web_update::https(int https)
+
+void web_update::https(bool https)
 {
     Https = https;
 }
-void web_update::buffer_size(int Buffer)
+
+void web_update::buffer_size(uint16_t Buffer)
 {
     buffer = Buffer;
 }
-void web_update::timeout(int timeout)
+
+void web_update::timeout(uint8_t timeout)
 {
     time_out = timeout;
 }
 
-void updateFirmware(uint8_t *data, size_t len)
+void web_update::updateFirmware(uint8_t *data, size_t len)
 {
     Update.write(data, len);
     currentLength += len;
     if (debug)
-        Serial.println(String(currentLength) + "/" + String(totalLength));
+    {
+        Serial.print(currentLength);
+        Serial.print("/");
+        Serial.println(totalLength);
+    }
     if (currentLength != totalLength)
         return;
     Update.end(true);
@@ -68,11 +64,14 @@ void updateFirmware(uint8_t *data, size_t len)
 
 int web_update::update_wifi()
 {
-    String host = Host + dir;
+    char host[100];
     if (Https)
-        host = "https://" + host;
+        strcpy(host, "https://");
     else
-        host = "http://" + host;
+        strcpy(host, "http://");
+
+    strcat(host, HostC);
+    strcat(host, dirC);
 
     if (WiFi.status() != WL_CONNECTED)
     {
@@ -81,11 +80,17 @@ int web_update::update_wifi()
         return 1;
     }
     if (debug)
-        Serial.println("Conecting to HOST: " + host);
+    {
+        Serial.print("Conecting to HOST: ");
+        Serial.println(host);
+    }
     wifi_client.begin(host);
-    int response = wifi_client.GET();
+    uint16_t response = wifi_client.GET();
     if (debug)
-        Serial.println("Response: " + String(response));
+    {
+        Serial.print("Response: ");
+        Serial.println(response);
+    }
     if (response != 200)
     {
         if (debug)
@@ -94,10 +99,13 @@ int web_update::update_wifi()
         return 2;
     }
     totalLength = wifi_client.getSize();
-    int len = totalLength;
+    uint32_t len = totalLength;
     Update.begin(UPDATE_SIZE_UNKNOWN);
     if (debug)
-        Serial.println("Update size: " + String(totalLength));
+    {
+        Serial.print("Update size: ");
+        Serial.println(totalLength);
+    }
     uint8_t buff[buffer] = {0};
     WiFiClient *stream = wifi_client.getStreamPtr();
     if (debug)
@@ -120,7 +128,7 @@ int web_update::update_wifi()
         size_t size = stream->available();
         if (size)
         {
-            int c = stream->readBytes(buff, ((size > sizeof(buff)) ? sizeof(buff) : size));
+            uint16_t c = stream->readBytes(buff, ((size > sizeof(buff)) ? sizeof(buff) : size));
             updateFirmware(buff, c);
             if (len > 0)
                 len -= c;
@@ -138,25 +146,30 @@ bool web_update::isUpdating()
 #ifdef UpdateOverEthernet
 int web_update::update_ethernet()
 {
-
     if (!Ethernet.hardwareStatus)
     {
         if (debug)
             Serial.println("No ethernet hardware found!");
         return 1;
     }
-    int str_len = Host.length() + 1;
-    char serverName[str_len];
-    Host.toCharArray(serverName, str_len);
-    strcpy(serverName, Host.c_str());
     if (debug)
-        Serial.println("Conecting to Host: " + Host);
-    if (ethernet_client.connect(serverName, 80)) // starts ethernet_client connection, checks for connection
+    {
+        Serial.print("Conecting to Host: ");
+        Serial.println(HostC);
+    }
+    if (ethernet_client.connect(HostC, 80)) // starts ethernet_client connection, checks for connection
     {
         if (debug)
-            Serial.println("Connected to Host, now getting firmware, on: " + Host + dir);
-        ethernet_client.println("GET " + dir + " HTTP/1.1");
-        ethernet_client.println("Host: " + Host);
+        {
+            Serial.print("Connected to Host, now getting firmware, on: ");
+            Serial.print(HostC);
+            Serial.println(dirC);
+        }
+        ethernet_client.print("GET ");
+        ethernet_client.print(dirC);
+        ethernet_client.println(" HTTP/1.1");
+        ethernet_client.print("Host: ");
+        ethernet_client.println(HostC);
         ethernet_client.println("Connection: close");
         ethernet_client.println();
     }
@@ -168,8 +181,8 @@ int web_update::update_ethernet()
     }
 
     uint8_t buff[buffer] = {0};
-    int bb = 0;
-    int resp_header = 0; // get the response header out of the payload
+    uint32_t bb = 0;
+    uint32_t resp_header = 0; // get the response header out of the payload
     Update.begin(UPDATE_SIZE_UNKNOWN);
     delai = millis();
     time_out *= 1000;
@@ -204,7 +217,7 @@ int web_update::update_ethernet()
             }
             else
             {
-                int c = ethernet_client.readBytes(buff, ((size > sizeof(buff)) ? sizeof(buff) : size));
+                uint16_t c = ethernet_client.readBytes(buff, ((size > sizeof(buff)) ? sizeof(buff) : size));
                 Update.write(buff, c);
                 bb += c;
                 if (debug)
