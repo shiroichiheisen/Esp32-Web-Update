@@ -46,6 +46,7 @@ This library allows you to update the firmware of your ESP32 microcontroller ove
     * 2: Host not found.
     * 3: Update timeout.
     * 4: Buffer size too large (exceeds available memory).
+    * 4: Update failed.
 
 **Examples:**
 

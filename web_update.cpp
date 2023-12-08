@@ -314,8 +314,15 @@ uint8_t web_update::update_ethernet()
         delay(10);
     }
     ethernet_client.stop(); // stop ethernet_client
-    Update.end(true);
-    ESP.restart();
+    bool ok = Update.end(true);
+    if (ok)
+        ESP.restart();
+    else
+    {
+        if (debug)
+            Serial.println("Update failed");
+        return 5;
+    }
     return 0;
 }
 #endif
