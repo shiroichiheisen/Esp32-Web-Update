@@ -6,7 +6,7 @@
 #include <Update.h>
 #include <AsyncDelay.h>
 
-//#define UpdateOverEthernet // uncomment this line if you want to use ethernet instead of wifi
+#define UpdateOverEthernet // uncomment this line if you want to use ethernet instead of wifi
 
 #ifdef UpdateOverEthernet
 #include <Ethernet.h>

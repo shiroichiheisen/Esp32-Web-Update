@@ -54,7 +54,7 @@ This library allows you to update the firmware of your ESP32 microcontroller ove
 **Additional notes:**
 
 * You can only use Arduino or PlatformIO to compile your firmware (if you program with one and try to update with the other, it will fail).
-* With servers with high latency, the update may fail due to garbage data being read from the server.
+* With servers with high latency (>200ms), the update may fail due to garbage data being read from the server.
 * Requires the following Arduino libraries:
     * HTTPClient
     * Update
