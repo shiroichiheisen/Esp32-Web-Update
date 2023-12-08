@@ -1,4 +1,4 @@
-**Esp32 Web Update**
+# Esp32 Web Update
 
 This library allows you to update the firmware of your ESP32 microcontroller over WiFi and Ethernet.
 
