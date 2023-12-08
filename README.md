@@ -1,119 +1,66 @@
-# Esp32 Web Update
+**Esp32 Web Update**
 
-Library for updating the firmware of an Esp32 device over the web with wifi and ethernet.
+This library allows you to update the firmware of your ESP32 microcontroller over WiFi and Ethernet.
 
-## ☕ Using this library
+**Features:**
 
-To use this library, you need to download, install the library, define if you will use ethernet to update, and include the following file in your project:
+* **Simple and intuitive API:** easy to integrate into your existing ESP32 projects.
+* **Broad connectivity:** supports updates over both WiFi and Ethernet networks.
+* **Detailed feedback:** provides clear debug messages and error codes for troubleshooting.
+* **Customization options:** configure buffer size, update timeout, and server details.
+* **Secure updates:** supports HTTPS for secure communication with the update server (https only on wifi).
 
-```
-#define UpdateOverEthernet //Only if you will use ethernet to update the firmware
-#include <web_update.h>
-```
+**Installation:**
 
-After that, you declare the web_update object with the following customizations:
+1. **Download the library files:**
+    * **Arduino IDE:** Download the ZIP file and install it through the "Sketch" > "Include Library" > "Add .ZIP Library..." menu.
+    * **PlatformIO IDE:** Place the library folder within the "lib" directory of your project.
+2. **Include the library header:**
+    * `#include <web_update.h>`
 
-HOST - DNS of the server where the firmware is - Optional
+**Usage:**
 
-Directory - The URL to the firmware file inside the server. - Optional
+**1. Initialization:**
 
-Debugger - If you want to know what's happening on the update via Serial, set this to 1. - Optional (Default: 0)
+* Create a `web_update` object.
+* Optionally, configure its settings using the available methods:
+    * `host`: Update server hostname or IP address.
+    * `hostPort`: Update server port (default: 80 for HTTP, 443 for HTTPS).
+    * `directory`: Directory on the server containing the update file.
+    * `debugger`: Enable/disable debug messages (default: false).
+    * `https`: Use HTTPS for secure updates (default: true) (https only on wifi).
+    * `buffer_size`: Buffer size for reading update data (default: esp free heap size / 3).
+    * `timeout`: Update timeout in seconds (default: 60).
 
-HTTPS - If you're using SSL or not on your website, 0 to HTTP and 1 to HTTPS - Optional (Default: 1)
+**2. Update process:**
 
-The ethernet update part only works with http links (without ssl)!!!!!!!!
+* Start the update for your chosen network:
+    * `updater.update_wifi();` (WiFi)
+    * `updater.update_ethernet();` (Ethernet)
+* Use `updater.isUpdating()` to check if the update is still ongoing.
 
-Buffer Size - The size of the buffer to store the firmware. - Optional (Default: 64)
+**3. Error handling:**
 
-Time Out - Timeout for the update process. - Optional (Default: 60)
+* Error codes are provided for troubleshooting:
+    * 1: WiFi not connected / Ethernet hardware not found.
+    * 2: Host not found.
+    * 3: Update timeout.
+    * 4: Buffer size too large (exceeds available memory).
 
-```
-web_update webUpdate(String HOST, String Directory, int Debbuger, int HTTPS, int BUFFER_SIZE, int TIME_OUT);
+**Examples:**
 
-web_update webUpdate("www.google.com", "/firmware_file.bin", 1, 1, 128, 120);
-```
+* Examples demonstrating various usage scenarios will be added soon.
 
-You can change the options above in the code:
+**Additional notes:**
 
-Change host:
-```
-webUpdate.host(String Host);
-```
+* You can only use Arduino or PlatformIO to compile your firmware (if you program with one and try to update with the other, it will fail).
+* With servers with high latency, the update may fail due to garbage data being read from the server.
+* Requires the following Arduino libraries:
+    * HTTPClient
+    * Update
+    * AsyncDelay
+    * (Ethernet if using `UpdateOverEthernet`)
+* Refer to the source code comments for detailed information about the library.
+* Contributions are welcome! Please submit bug reports and pull requests to improve the library.
 
-Change Directory:
-```
-webUpdate.directory(String Directory);
-```
-
-Change Debugger level:
-```
-webUpdate.debugger(int Debugger);
-```
-
-Change https level:
-```
-webUpdate.https(int https);
-```
-
-Change Buffer Size:
-```
-webUpdate.buffer_size(int buffer_size);
-```
-
-Change Time Out time:
-```
-webUpdate.timeout(int timeout);
-```
-
-Verify if its updating the firmware:
-```
-webUpdate.isUpdating();
-```
-
-----
-
-When you want to start the update process, you call the following methods:
-
-Update via WIFI:
-
-```
-webUpdate.update_wifi();
-```
-
-Update via Ethernet:
-
-```
-webUpdate.update_ethernet();
-```
-
-If any error occurs, the method will return the error code:
-
-For WIFI:
-
-1 - Wifi not connected.
-
-2 - File or host not found.
-
-3 - Update Timeout.
-
-For Ethernet:
-
-1 - Ethernet Hardware not found.
-
-2 - Host not found.
-
-3 - Dir directory with error 404 (file not found)
-
-4 - Update Timeout.
-
-
-I strongly recommend to use the reset pin on the ethernet hardware, they have so many problems! and with the reset pin you can reset if any error occurs!
-
-
-## ❌ Some errors I have found and solutions:
-
-If you create the firmware file (.bin) on Arduino and make the update firmware (.bin) on PlatformIO or vice versa, the update process will complete but when the esp32 tries to load the firmware will show that the firmware is corrupted! The firmware and the update firmware MUST BE ON THE SAME PLATFORM!
-
-The ethernet update part when compiled on PlatformIO will not work on the Arduino 2.0 beta, meaning only work with the esp32, not with esp32-s2,esp32-c3,esp32-s3, and so on, I recommend using the ethernet part on Arduino ide or wait for the final update for the Arduino 2.0 framework for the PlatformIO to use other versions of the esp32, on the Arduino ide the ethernet part work 100% for the esp32 and other versions also!
-
-Wifi update part based on [@kurimawxx00/webota-esp32](https://github.com/kurimawxx00/webota-esp32).
+**Special thanks to @kurimawxx00/webota-esp32: [https://github.com/kurimawxx00/webota-esp32](https://github.com/kurimawxx00/webota-esp32) for their contribution to the WiFi update functionality.**

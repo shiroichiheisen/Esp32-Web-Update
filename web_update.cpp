@@ -3,42 +3,63 @@
 #include <Update.h>
 #include <WiFi.h>
 
-web_update::web_update(bool debugger, bool https, uint16_t read_buffer, uint8_t timeout_seconds)
+web_update::web_update(bool debugger, uint16_t read_buffer, uint8_t timeout_seconds, bool https)
 {
-    buffer = read_buffer;
-    debug = debugger;
-    time_out = timeout_seconds;
-    Https = https;
+    if (buffer < 64)
+        buffer = 64;
+
+    if (timeout_seconds < 1)
+        timeout_seconds = 1;
+
+    this->buffer = read_buffer;
+    this->debug = debugger;
+    this->time_out = timeout_seconds;
+    this->Https = https;
 }
 
 void web_update::host(char *host)
 {
-    HostC = host;
+    this->HostC = host;
+}
+
+void web_update::host(IPAddress host)
+{
+    this->ip = host;
+}
+
+void web_update::hostPort(uint16_t port)
+{
+    this->hostPort_ = port;
 }
 
 void web_update::directory(char *Dir)
 {
-    dirC = Dir;
+    this->dirC = Dir;
 }
 
 void web_update::debugger(bool debugger)
 {
-    debug = debugger;
+    this->debug = debugger;
 }
 
 void web_update::https(bool https)
 {
-    Https = https;
+    this->Https = https;
 }
 
 void web_update::buffer_size(uint16_t Buffer)
 {
-    buffer = Buffer;
+    if (buffer < 64)
+        buffer = 64;
+
+    this->buffer = Buffer;
 }
 
 void web_update::timeout(uint8_t timeout)
 {
-    time_out = timeout;
+    if (timeout < 1)
+        timeout = 1;
+    this->time_out = timeout;
 }
 
 void web_update::updateFirmware(uint8_t *data, size_t len)
@@ -62,9 +83,23 @@ void web_update::updateFirmware(uint8_t *data, size_t len)
     ESP.restart();
 }
 
-int web_update::update_wifi()
+#ifndef UpdateOverEthernet
+uint8_t web_update::update_wifi()
 {
-    char host[strlen(HostC) + strlen(dirC) + 20];
+    vPortEnterCritical;
+    if (buffer > esp_get_free_heap_size())
+    {
+        if (debug)
+            Serial.println("Buffer size is bigger than free heap size");
+        updatingFirmware = false;
+        vPortExitCritical;
+        return 4;
+    }
+
+    if (buffer == 1)
+        buffer = esp_get_free_heap_size() / 3;
+
+    char *host = new char[strlen(HostC) + strlen(dirC) + 20];
     if (Https)
         strcpy(host, "https://");
     else
@@ -77,6 +112,7 @@ int web_update::update_wifi()
     {
         if (debug)
             Serial.println("WiFi not connected");
+        vPortExitCritical;
         return 1;
     }
     if (debug)
@@ -96,6 +132,7 @@ int web_update::update_wifi()
         if (debug)
             Serial.println("Check host destination and internet conection.");
         wifi_client.end();
+        vPortExitCritical;
         return 2;
     }
     totalLength = wifi_client.getSize();
@@ -106,29 +143,29 @@ int web_update::update_wifi()
         Serial.print("Update size: ");
         Serial.println(totalLength);
     }
-    uint8_t buff[buffer] = {0};
+    uint8_t *buff = new uint8_t[buffer];
     WiFiClient *stream = wifi_client.getStreamPtr();
     if (debug)
         Serial.println("Starting Update");
-    delai = millis();
     time_out *= 1000;
     while (wifi_client.connected() && (len > 0 || len == -1))
     {
         updatingFirmware = true;
-        unsigned long currentMillis = millis();
-        if ((unsigned long)(currentMillis - delai) >= time_out)
+        if (updateAsyncDelay.isExpired())
         {
             if (debug)
                 Serial.println("Update timeout");
-            Update.end(false);
+            Update.end();
             wifi_client.end();
-            delai = currentMillis;
+            updatingFirmware = false;
+            vPortExitCritical;
             return 3;
         }
+
         size_t size = stream->available();
         if (size)
         {
-            uint16_t c = stream->readBytes(buff, ((size > sizeof(buff)) ? sizeof(buff) : size));
+            uint16_t c = stream->readBytes(buff, ((size > buffer) ? buffer : size));
             updateFirmware(buff, c);
             if (len > 0)
                 len -= c;
@@ -137,6 +174,7 @@ int web_update::update_wifi()
     }
     return 0; // to dont show warning on vscode using platformio
 }
+#endif
 
 bool web_update::isUpdating()
 {
@@ -144,32 +182,68 @@ bool web_update::isUpdating()
 }
 
 #ifdef UpdateOverEthernet
-int web_update::update_ethernet()
+uint8_t web_update::update_ethernet()
 {
+    vPortEnterCritical;
+    if (buffer > esp_get_free_heap_size())
+    {
+        if (debug)
+            Serial.println("Buffer size is bigger than free heap size");
+        updatingFirmware = false;
+        vPortExitCritical;
+        return 4;
+    }
+
+    if (buffer == 1)
+        buffer = esp_get_free_heap_size() / 3;
+
+    updatingFirmware = true;
     if (!Ethernet.hardwareStatus)
     {
         if (debug)
             Serial.println("No ethernet hardware found!");
+        updatingFirmware = false;
+        vPortExitCritical;
         return 1;
     }
     if (debug)
     {
         Serial.print("Conecting to Host: ");
-        Serial.println(HostC);
+        if (ip[0] == 0)
+            Serial.print(HostC);
+        else
+            Serial.print(ip);
     }
-    if (ethernet_client.connect(HostC, 80)) // starts ethernet_client connection, checks for connection
+
+    uint32_t connectionSuccess;
+
+    if (ip[0] == 0)
+        connectionSuccess = ethernet_client.connect(HostC, hostPort_);
+    else
+        connectionSuccess = ethernet_client.connect(ip, hostPort_);
+
+    if (connectionSuccess) // starts ethernet_client connection, checks for connection
     {
+
         if (debug)
         {
             Serial.print("Connected to Host, now getting firmware, on: ");
-            Serial.print(HostC);
+            if (ip[0] == 0)
+                Serial.print(HostC);
+            else
+                Serial.print(ip);
+            Serial.print(" ");
             Serial.println(dirC);
+            Serial.println();
         }
         ethernet_client.print("GET ");
         ethernet_client.print(dirC);
         ethernet_client.println(" HTTP/1.1");
         ethernet_client.print("Host: ");
-        ethernet_client.println(HostC);
+        if (ip[0] == 0)
+            ethernet_client.println(HostC);
+        else
+            ethernet_client.println(ip);
         ethernet_client.println("Connection: close");
         ethernet_client.println();
     }
@@ -177,59 +251,71 @@ int web_update::update_ethernet()
     {
         if (debug)
             Serial.println("Check host destination and internet conection.");
+        updatingFirmware = false;
+        vPortExitCritical;
         return 2;
     }
 
-    uint8_t buff[buffer] = {0};
+    uint8_t *buff = new uint8_t[buffer];
+
     uint32_t bb = 0;
     uint32_t resp_header = 0; // get the response header out of the payload
     Update.begin(UPDATE_SIZE_UNKNOWN);
-    delai = millis();
+
     time_out *= 1000;
+    updateAsyncDelay.start(time_out, AsyncDelay::MILLIS);
+
+    char lastFourChars[4] = {0, 1, 2, 3};
+    bool headerEnded = false;
     while (ethernet_client.connected() && !ethernet_client.available())
         vTaskDelay(1); // waits for data
     while (ethernet_client.connected() || ethernet_client.available())
     {
-        unsigned long currentMillis = millis();
-        if ((unsigned long)(currentMillis - delai) >= time_out)
+        if (updateAsyncDelay.isExpired())
         {
             if (debug)
                 Serial.println("Update timeout");
-            Update.end(false);
-            delai = currentMillis;
-            return 4;
+            Update.end();
+            ethernet_client.stop();
+            updatingFirmware = false;
+            return 3;
         }
 
-        size_t size = ethernet_client.available();
-        if (size)
+        uint32_t size = ethernet_client.available();
+        if (!headerEnded)
         {
-            if (resp_header < 10)
+            char c = ethernet_client.read();
+            if (debug)
+                Serial.print(c); // get the response header out of the payload
+
+            lastFourChars[0] = lastFourChars[1];
+            lastFourChars[1] = lastFourChars[2];
+            lastFourChars[2] = lastFourChars[3];
+            lastFourChars[3] = c;
+
+            if (lastFourChars[0] == '\r' && lastFourChars[1] == '\n' && lastFourChars[2] == '\r' && lastFourChars[3] == '\n')
             {
-                String header = ethernet_client.readStringUntil('\n');
-                if (header.indexOf("404 Not Found") > 0) // If the firmware was not found in the dir url
-                {
-                    if (debug)
-                        Serial.println("Check dir destination.");
-                    return 3;
-                }
+                headerEnded = true;
                 if (debug)
-                    Serial.println(header); // get the response header out of the payload
+                    Serial.println("----- Header End -----");
+                continue;
             }
-            else
-            {
-                uint16_t c = ethernet_client.readBytes(buff, ((size > sizeof(buff)) ? sizeof(buff) : size));
-                Update.write(buff, c);
-                bb += c;
-                if (debug)
-                    Serial.println(bb);
-            }
-            resp_header += 1;
+
+            if (!headerEnded)
+                continue;
         }
-        vTaskDelay(1);
+
+        memset(buff, 0, buffer);
+        uint16_t c = ethernet_client.readBytes(buff, ((size > buffer) ? buffer : size));
+        Update.write(buff, c);
+        bb += c;
+        if (debug)
+            Serial.println(bb);
+        delay(10);
     }
     ethernet_client.stop(); // stop ethernet_client
     Update.end(true);
     ESP.restart();
-    return 0; // to dont show warning on vscode using platformio
+    return 0;
 }
 #endif
