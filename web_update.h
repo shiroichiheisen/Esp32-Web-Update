@@ -6,7 +6,7 @@
 #include <Update.h>
 #include <AsyncDelay.h>
 
-#define UpdateOverEthernet // uncomment this line if you want to use ethernet instead of wifi
+//#define UpdateOverEthernet // uncomment this line if you want to use ethernet instead of wifi
 
 #ifdef UpdateOverEthernet
 #include <Ethernet.h>
@@ -32,8 +32,6 @@ public:
 #endif
 
 private:
-    void updateFirmware(uint8_t *data, size_t len);
-
     uint32_t
         buffer,
 

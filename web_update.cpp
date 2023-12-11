@@ -62,27 +62,6 @@ void web_update::timeout(uint8_t timeout)
     this->time_out = timeout;
 }
 
-void web_update::updateFirmware(uint8_t *data, size_t len)
-{
-    Update.write(data, len);
-    currentLength += len;
-    if (debug)
-    {
-        Serial.print(currentLength);
-        Serial.print("/");
-        Serial.println(totalLength);
-    }
-    if (currentLength != totalLength)
-        return;
-    Update.end(true);
-    if (debug)
-    {
-        Serial.println("Update complete");
-        delay(3000);
-    }
-    ESP.restart();
-}
-
 #ifndef UpdateOverEthernet
 uint8_t web_update::update_wifi()
 {
@@ -112,6 +91,8 @@ uint8_t web_update::update_wifi()
     {
         if (debug)
             Serial.println("WiFi not connected");
+        updatingFirmware = false;
+        delete[] host;
         vPortExitCritical;
         return 1;
     }
@@ -132,6 +113,8 @@ uint8_t web_update::update_wifi()
         if (debug)
             Serial.println("Check host destination and internet conection.");
         wifi_client.end();
+        updatingFirmware = false;
+        delete[] host;
         vPortExitCritical;
         return 2;
     }
@@ -158,6 +141,9 @@ uint8_t web_update::update_wifi()
             Update.end();
             wifi_client.end();
             updatingFirmware = false;
+            updatingFirmware = false;
+            delete[] host;
+            delete[] buff;
             vPortExitCritical;
             return 3;
         }
@@ -166,11 +152,34 @@ uint8_t web_update::update_wifi()
         if (size)
         {
             uint16_t c = stream->readBytes(buff, ((size > buffer) ? buffer : size));
-            updateFirmware(buff, c);
+            Update.write(buff, c);
+            currentLength += c;
+            if (debug)
+            {
+                Serial.print(currentLength);
+                Serial.print("/");
+                Serial.println(totalLength);
+            }
+
             if (len > 0)
                 len -= c;
+
+            if (currentLength >= totalLength)
+            {
+                bool ok = Update.end(true);
+                if (ok)
+                    ESP.restart();
+                else
+                {
+                    if (debug)
+                        Serial.println("Update failed");
+                    delete[] buff;
+                    delete[] host;
+                    vPortExitCritical;
+                    return 5;
+                }
+            }
         }
-        vTaskDelay(1);
     }
     return 0; // to dont show warning on vscode using platformio
 }
@@ -278,6 +287,8 @@ uint8_t web_update::update_ethernet()
             Update.end();
             ethernet_client.stop();
             updatingFirmware = false;
+            delete[] buff;
+            vPortExitCritical;
             return 3;
         }
 
@@ -321,6 +332,8 @@ uint8_t web_update::update_ethernet()
     {
         if (debug)
             Serial.println("Update failed");
+        delete[] buff;
+        vPortExitCritical;
         return 5;
     }
     return 0;
