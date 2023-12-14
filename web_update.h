@@ -6,7 +6,7 @@
 #include <Update.h>
 #include <AsyncDelay.h>
 
-//#define UpdateOverEthernet // uncomment this line if you want to use ethernet instead of wifi
+// #define UpdateOverEthernet // uncomment this line if you want to use ethernet instead of wifi
 
 #ifdef UpdateOverEthernet
 #include <Ethernet.h>
@@ -15,7 +15,7 @@
 class web_update
 {
 public:
-    web_update(bool debugger = false, uint16_t read_buffer = 1, uint8_t timeout_seconds = 60, bool https = true);
+    web_update(bool debugger = false, uint8_t timeout_seconds = 60, uint16_t read_buffer = 1, bool https = true);
     void host(char *host);
     void host(IPAddress host);
     void hostPort(uint16_t port);

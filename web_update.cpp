@@ -3,7 +3,7 @@
 #include <Update.h>
 #include <WiFi.h>
 
-web_update::web_update(bool debugger, uint16_t read_buffer, uint8_t timeout_seconds, bool https)
+web_update::web_update(bool debugger, uint8_t timeout_seconds, uint16_t read_buffer, bool https)
 {
     if (buffer < 64)
         buffer = 64;
@@ -66,6 +66,10 @@ void web_update::timeout(uint8_t timeout)
 uint8_t web_update::update_wifi()
 {
     vPortEnterCritical;
+
+    if (buffer == 1)
+        buffer = 16384;
+
     if (buffer > esp_get_free_heap_size())
     {
         if (debug)
@@ -74,9 +78,6 @@ uint8_t web_update::update_wifi()
         vPortExitCritical;
         return 4;
     }
-
-    if (buffer == 1)
-        buffer = esp_get_free_heap_size() / 3;
 
     char *host = new char[strlen(HostC) + strlen(dirC) + 20];
     if (Https)
@@ -194,6 +195,10 @@ bool web_update::isUpdating()
 uint8_t web_update::update_ethernet()
 {
     vPortEnterCritical;
+
+    if (buffer == 1)
+        buffer = 16384;
+
     if (buffer > esp_get_free_heap_size())
     {
         if (debug)
@@ -202,9 +207,6 @@ uint8_t web_update::update_ethernet()
         vPortExitCritical;
         return 4;
     }
-
-    if (buffer == 1)
-        buffer = esp_get_free_heap_size() / 3;
 
     updatingFirmware = true;
     if (!Ethernet.hardwareStatus)

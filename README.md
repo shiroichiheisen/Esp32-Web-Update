@@ -27,9 +27,9 @@ This library allows you to update the firmware of your ESP32 microcontroller ove
     * `host`: Update server hostname or IP address.
     * `hostPort`: Update server port (default: 80 for HTTP, 443 for HTTPS).
     * `directory`: Directory on the server containing the update file.
-    * `debugger`: Enable/disable debug messages (default: false).
+    * `debugger`: Enable/disable debug messages (default: false). 
     * `https`: Use HTTPS for secure updates (default: true) (https only on wifi).
-    * `buffer_size`: Buffer size for reading update data (default: esp free heap size / 3).
+    * `buffer_size`: Buffer size for reading update data (default: 16384).
     * `timeout`: Update timeout in seconds (default: 60).
 
 **2. Update process:**
