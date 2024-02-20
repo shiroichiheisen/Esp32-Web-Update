@@ -42,6 +42,11 @@ void web_update::debugger(bool debugger)
     this->debug = debugger;
 }
 
+void web_update::debuggerProd(bool debugger)
+{
+    this->debugProd = debugger;
+}
+
 void web_update::https(bool https)
 {
     this->Https = https;
@@ -213,6 +218,9 @@ uint8_t web_update::update_ethernet()
     {
         if (debug)
             Serial.println("No ethernet hardware found!");
+        if (debugProd)
+            Serial.println("Error on update");
+        Serial.println();
         updatingFirmware = false;
         vPortExitCritical;
         return 1;
@@ -261,7 +269,7 @@ uint8_t web_update::update_ethernet()
     else
     {
         if (debug)
-            Serial.println("Check host destination and internet conection.");
+            Serial.println("\r\nCheck host destination and internet conection.");
         updatingFirmware = false;
         vPortExitCritical;
         return 2;
@@ -286,6 +294,9 @@ uint8_t web_update::update_ethernet()
         {
             if (debug)
                 Serial.println("Update timeout");
+            if (debugProd)
+                Serial.println("Update failed, check internet connection.");
+            Serial.println();
             Update.end();
             ethernet_client.stop();
             updatingFirmware = false;
@@ -332,8 +343,9 @@ uint8_t web_update::update_ethernet()
         ESP.restart();
     else
     {
-        if (debug)
-            Serial.println("Update failed");
+        if (debug || debugProd)
+            Serial.println("Update failed.");
+        Serial.println();
         delete[] buff;
         vPortExitCritical;
         return 5;

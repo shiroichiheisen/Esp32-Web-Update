@@ -6,7 +6,7 @@
 #include <Update.h>
 #include <AsyncDelay.h>
 
-// #define UpdateOverEthernet // uncomment this line if you want to use ethernet instead of wifi
+#define UpdateOverEthernet // uncomment this line if you want to use ethernet instead of wifi
 
 #ifdef UpdateOverEthernet
 #include <Ethernet.h>
@@ -21,6 +21,7 @@ public:
     void hostPort(uint16_t port);
     void directory(char *Dir);
     void debugger(bool debugger);
+    void debuggerProd(bool debugger);
     void https(bool https);
     void buffer_size(uint16_t Buffer);
     void timeout(uint8_t timeout);
@@ -44,6 +45,7 @@ private:
 
     bool
         debug,
+        debugProd = false,
         Https,
         updatingFirmware = false;
 
